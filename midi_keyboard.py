@@ -1,11 +1,8 @@
-import time
 from digitalio import DigitalInOut, Direction, Pull
 import board
 
-led = DigitalInOut(board.LED)
-led.direction = Direction.OUTPUT
+from midi_event import Event, EventType
 
-buttons = []
 
 gps = [
     board.GP0,
@@ -36,26 +33,40 @@ gps = [
     board.GP28,
     ]
 
-for pin in gps:
-    switch = DigitalInOut(pin)
-    switch.direction = Direction.INPUT
-    switch.pull = Pull.UP
-    buttons.append(switch)
+class Keyboard:
+
+    def __init__(self, queue):
+        self.queue = queue
+        self.buttons = []
+        self.pressed = []
+        
+        for pin in gps:
+            switch = DigitalInOut(pin)
+            switch.direction = Direction.INPUT
+            switch.pull = Pull.UP
+
+            self.buttons.append(switch)
+            self.pressed.append(False)
 
 
 
-while True:
-    
-    pressed = False
-    for but in buttons:
-      if but.value != True:
-        pressed = True
-        break
+    def read_buttons(self):
+        current = [but.value != True for but in self.buttons] # check 0 digital input
+        i = 0
+        for i in range(0, len(current) - 1):
+            cur = current[i]
+            prev = self.pressed[i]
+            if cur == prev:
+                continue
+            
+            if cur == True: 
+                value = i + 40
+                self.queue.append(Event(type = EventType.NOTE_ON, value = value))
+            if cur == False:
+                value = i + 40
+                self.queue.append(Event(type = EventType.NOTE_OFF, value = value))
 
-    led.value = pressed
-
-    
-#    led.value = True
-#    time.sleep(0.1)
-#    led.value = False
-#    time.sleep(0.1)
+#            self.pressed[i] = cur
+            i = i + 1
+            
+        self.pressed = current
