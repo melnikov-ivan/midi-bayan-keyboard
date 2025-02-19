@@ -53,7 +53,7 @@ class Keyboard:
 
     def read_buttons(self):
         current = [but.value != True for but in self.buttons] # check 0 digital input
-        i = 0
+
         for i in range(len(current)):
             cur = current[i]
             prev = self.pressed[i]
@@ -67,7 +67,5 @@ class Keyboard:
             if cur == False:
                 self.queue.append(Event(type = EventType.NOTE_OFF, value = note))
 
-#            self.pressed[i] = cur
-            i = i + 1
             
         self.pressed = current
