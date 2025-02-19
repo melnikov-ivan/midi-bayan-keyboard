@@ -5,32 +5,32 @@ from midi_event import Event, EventType
 
 
 gps = [
-    board.GP0,
-    board.GP1,
-    board.GP2,
-    board.GP3,
-    board.GP4,
-    board.GP5,
-    board.GP6,
-    board.GP7,
-    board.GP8,
-    board.GP9,
-    board.GP10,
-    board.GP11,
-    board.GP12,
-    board.GP13,
-    board.GP14,
-    board.GP15,
-    board.GP16,
-    board.GP17,
-    board.GP18,
-    board.GP19,
-    board.GP20,
-    board.GP21,
-    board.GP22,
-    board.GP26,
-    board.GP27,
-    board.GP28,
+    {'pin': board.GP0, 'note': 69},
+    {'pin': board.GP1, 'note': 72},
+    {'pin': board.GP2, 'note': 66},
+    {'pin': board.GP3, 'note': 63},
+    {'pin': board.GP4, 'note': 60},
+    {'pin': board.GP5, 'note': 57},
+    {'pin': board.GP6, 'note': 54},
+    {'pin': board.GP7, 'note': 51}, # d#
+    {'pin': board.GP8, 'note': 48}, # с
+    {'pin': board.GP9, 'note': 70},
+    {'pin': board.GP10, 'note': 67},
+    {'pin': board.GP11, 'note': 64},
+    {'pin': board.GP12, 'note': 61},
+    {'pin': board.GP13, 'note': 58},
+    {'pin': board.GP14, 'note': 55},
+    {'pin': board.GP15, 'note': 52}, # e
+    {'pin': board.GP16, 'note': 49}, # c#
+    {'pin': board.GP17, 'note': 71},
+    {'pin': board.GP18, 'note': 68},
+    {'pin': board.GP19, 'note': 65},
+    {'pin': board.GP20, 'note': 62},
+    {'pin': board.GP21, 'note': 59},
+    {'pin': board.GP22, 'note': 56},
+    {'pin': board.GP26, 'note': 53},
+    {'pin': board.GP27, 'note': 50}, # d
+    {'pin': board.GP28, 'note': 47}
     ]
 
 class Keyboard:
@@ -39,32 +39,33 @@ class Keyboard:
         self.queue = queue
         self.buttons = []
         self.pressed = []
+        self.layout = []
         
         for pin in gps:
-            switch = DigitalInOut(pin)
+            switch = DigitalInOut(pin['pin'])
             switch.direction = Direction.INPUT
             switch.pull = Pull.UP
 
             self.buttons.append(switch)
             self.pressed.append(False)
-
+            self.layout.append(pin['note'])
 
 
     def read_buttons(self):
         current = [but.value != True for but in self.buttons] # check 0 digital input
         i = 0
-        for i in range(0, len(current) - 1):
+        for i in range(len(current)):
             cur = current[i]
             prev = self.pressed[i]
             if cur == prev:
                 continue
-            
+
+            note = self.layout[i]
+            # print(str(i) + " " + str(note))
             if cur == True: 
-                value = i + 40
-                self.queue.append(Event(type = EventType.NOTE_ON, value = value))
+                self.queue.append(Event(type = EventType.NOTE_ON, value = note))
             if cur == False:
-                value = i + 40
-                self.queue.append(Event(type = EventType.NOTE_OFF, value = value))
+                self.queue.append(Event(type = EventType.NOTE_OFF, value = note))
 
 #            self.pressed[i] = cur
             i = i + 1
