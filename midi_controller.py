@@ -36,5 +36,3 @@ class Controller:
             # midi.send(ControlChange(3, 44))
             # midi.send(ProgramChange(22), channel = 0)
             # midi.send(PitchBend(random.randint(0, 16383)))
-
-        self.queue.clear()
